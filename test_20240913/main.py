@@ -1,20 +1,35 @@
-from typing import Annotated, Literal, List
+from typing import Union
 
-from fastapi import FastAPI, Query
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, Path, Body
+from pydantic import BaseModel
 
 app = FastAPI()
 
-
-class FilterParams(BaseModel):
-    model_config = {"extra": "forbid"}
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
     
-    limit: int = Field(100, gt=0, le=100)
-    offset: int = Field(0, ge=0)
-    order_by: Literal["created_at", "updated_at"] = "created_at"
-    tags: list[str] = []
+# class User(BaseModel):
+#     username: str
+#     full_name: Union[str, None] = None
+    
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item: Item = Body(embed=True)):
+    results = {"item_id": item_id, "item": item}
+    return results
 
-
-@app.get("/items/")
-async def read_items(filter_query: FilterParams):
-    return filter_query
+# @app.put("/items/{item_id}")
+# async def update_item(
+#     *,
+#     item_id: int, 
+#     item: Item,
+#     user: User,
+#     importance: int = Body(gt=0),
+#     q: str | None = None,
+# ):
+#     results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
+#     if q:
+#         results.update({"q": q})
+#     return results
