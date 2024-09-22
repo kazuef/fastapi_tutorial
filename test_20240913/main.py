@@ -1,23 +1,20 @@
-from typing import List, Union
+from typing import Union
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Path, Query
 
 app = FastAPI()
 
-@app.get("/items/")
+@app.get("/items/{item_id}")
 async def read_items(
-    q: Union[str, None] = Query(
-        default=None,
-        alias="item-query",
-        title="Query string",
-        description="Query string for the items to search in the database that have a good match",
-        min_length=3,
-        max_length=50,
-        pattern="^fixedquery$",
-        deprecated=True
-    ),
+    *,
+    # ge=1(item_id>=1), gt=1(item_id>1), le(item_id<=1)
+    item_id: int = Path(title="The ID of the item to get", gt=1, le=1000),
+    q: str,
+    size: float = Query(gt=0, lt=10.5),
 ):
-    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    results = {"item_id": item_id}
     if q:
         results.update({"q": q})
+    if size:
+        results.update({"size": size})
     return results
